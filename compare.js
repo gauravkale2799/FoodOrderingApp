@@ -1,52 +1,35 @@
-import { useEffect, useState } from 'react';
+import { useContext } from 'react';
 
-import Card from '../UI/Card';
-import MealItem from './MealItem/MealItem';
-import classes from './AvailableMeals.module.css';
+import MealItemForm from './MealItemForm';
+import classes from './MealItem.module.css';
+import CartContext from '../../../store/cart-context';
 
+const MealItem = (props) => {
+  const cartCtx = useContext(CartContext);
 
-const AvailableMeals = () => {
-  const [meals, setMeals] = useState([]);
+  const price = `$${props.price.toFixed(2)}`;
 
-  useEffect(() => {
-    const fetchMeals = async () => {
-      const response = await fetch('https://react-http-6b4a6.firebaseio.com/meals.json');
-      const responseData = await response.json();
-
-      const loadedMeals = [];
-
-      for (const key in responseData) {
-        loadedMeals.push({
-          id: key,
-          name: responseData[key].name,
-          description: responseData[key].description,
-          price: responseData[key].price,
-        });
-      }
-
-      setMeals(loadedMeals);
-    };
-
-    fetchMeals();
-  }, []);
-
-  const mealsList = meals.map((meal) => (
-    <MealItem
-      key={meal.id}
-      id={meal.id}
-      name={meal.name}
-      description={meal.description}
-      price={meal.price}
-    />
-  ));
+  const addToCartHandler = amount => {
+    cartCtx.addItem({
+      id: props.id,
+      name: props.name,
+      amount: amount,
+      price: props.price
+    });
+  };
 
   return (
-    <section className={classes.meals}>
-      <Card>
-        <ul>{mealsList}</ul>
-      </Card>
-    </section>
+    <li className={classes.meal}>
+      <div>
+        <h3>{props.name}</h3>
+        <div className={classes.description}>{props.description}</div>
+        <div className={classes.price}>{price}</div>
+      </div>
+      <div>
+        <MealItemForm onAddToCart={addToCartHandler} />
+      </div>
+    </li>
   );
 };
 
-export default AvailableMeals;
+export default MealItem;
